@@ -4,6 +4,7 @@ from sqlalchemy.orm import  DeclarativeBase, Mapped, mapped_column
 
 
 
+
 class Base(DeclarativeBase):
     pass
 
@@ -18,6 +19,8 @@ app=Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///new-books-collection.db"
 
 db.init_app(app)
+
+
 class Books(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(unique=True)
@@ -29,31 +32,13 @@ with app.app_context():
     db.create_all()
 
 
-@app.route('/')
-def home():
-    
+with app.app_context():
+    # book=Books( id=1, title="Harry Potter",author="J.K. Rowling",rating=9.3)
+    # db.session.add(book)
+    # db.session.commit()
 
-    return render_template("index.html", books=all_books)
+    result = db.session.execute(db.select(Books).order_by(Books.title))
+    all_books = result.scalar()
+    print(all_books.title)
 
-
-@app.route("/add", methods=["GET", "POST"])
-def add():
-
-    if request.method == "POST":
-    
-        Books(title=request.form["book name"],
-              author=request.form["book author"],
-              rating=request.form["rating"])
-
-        db.session.add(new_book)
-        db.session.commit()
-        return redirect(url_for('home'))
-        
-
-
-    return render_template("add.html")
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
 
